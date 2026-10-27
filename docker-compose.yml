@@ -1,0 +1,28 @@
+# One-command start:  cp .env.example .env && docker compose up --build
+# App: http://localhost:8080   API docs: http://localhost:8000/docs
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: fpi
+      POSTGRES_DB: fpi
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fpi"]
+      interval: 5s
+      retries: 10
+  backend:
+    build: ./backend
+    environment:
+      FPI_DATABASE_URL: postgresql+psycopg://fpi:${POSTGRES_PASSWORD}@db:5432/fpi
+      FPI_CORS_ORIGINS: http://localhost:8080,http://localhost:5173
+    depends_on:
+      db: { condition: service_healthy }
+    ports: ["8000:8000"]
+  frontend:
+    build: ./frontend
+    depends_on: [backend]
+    ports: ["8080:80"]
+volumes:
+  pgdata:
