@@ -1,64 +1,149 @@
 # Factory Profit Intelligence (FPI)
+### Turning Manufacturing Data into Profit Intelligence
 
-A locally runnable manufacturing analytics prototype that shows where a factory loses money across production, downtime, defects, inventory and energy, ranks the biggest sources, recommends actions, and tracks which claimed savings are actually verified.
+**Factory Profit Intelligence (FPI)** is a full-stack manufacturing analytics platform designed to help industrial teams identify profit leakage, investigate operational inefficiencies, prioritize corrective actions, and measure the financial impact of improvement initiatives.
 
-> **All data is SIMULATED DEMO DATA** for a fictional company, generated with a fixed random seed. Nothing is connected to real machinery. The app has no authentication and is not production-hardened: run it locally only. This is a prototype to build on, not a deployed product, and no customer, saving or result is claimed.
+Built around the principle that *every operational loss should be measurable, every recommendation should have evidence, and every claimed saving should be verifiable*, FPI brings production, downtime, quality, energy, and inventory analytics into one unified platform.
 
-## Quick start
+> **Engineering prototype:** The current application uses reproducible simulated data for a fictional manufacturer. It is designed for local evaluation and future real-world validation. No real factory deployment, customer result, or financial saving is claimed.
 
-### Option A: Docker (PostgreSQL)
+## The Vision
+
+Manufacturers generate enormous amounts of operational data, but identifying where that data translates into financial loss is challenging. FPI aims to bridge that gap by connecting operational metrics with transparent financial calculations and actionable improvement opportunities.
+
+The platform is designed to answer five critical business questions:
+
+- **Where is money being lost?** Identify and rank potential loss sources across factory operations.
+- **What is driving operational inefficiency?** Explore patterns in machine downtime, production performance, quality defects, and energy usage.
+- **Which actions deserve priority?** Generate evidence-backed recommendations based on deterministic analytical rules.
+- **What could improvement be worth?** Estimate avoidable costs and potential savings without treating every loss as recoverable profit.
+- **Which savings have actually been verified?** Separate identified opportunities, forecasts, estimates, and verified outcomes.
+
+## Core Capabilities
+
+### 1. Executive Manufacturing Intelligence
+A unified overview of production output, defect rates, machine downtime, energy costs, estimated losses, and target attainment, supported by cross-page filters and period comparisons.
+
+### 2. Profit Leakage Analysis
+A structured loss-analysis engine that distinguishes observed costs, estimated avoidable costs, and potential savings, with explicit assumptions to reduce double-counting.
+
+### 3. Operational Root-Cause Exploration
+Analytical comparisons, correlations, and outlier detection across production lines, machines, products, and shifts. Relationships are presented as associations rather than proof of causation.
+
+### 4. Evidence-Based Recommendation Engine
+A deterministic rules engine that generates improvement recommendations with supporting evidence, severity, status tracking, and persistent notes—without requiring a paid AI API.
+
+### 5. Savings Verification Framework
+A dedicated workflow for distinguishing identified opportunities, forecast savings, estimated savings, and verified savings. Verification is governed by server-side checks rather than a manually entered positive amount alone.
+
+### 6. Live Manufacturing Simulation
+A controllable simulator that generates new demonstration events and writes them into the application's database, allowing users to explore changing metrics, pause or step through activity, and reset the demo.
+
+### 7. Data Ingestion and Quality Controls
+CSV validation, duplicate detection, rejected-row reporting, import history, and export functionality designed to make data quality visible before records enter analytical workflows.
+
+## Technology Stack
+
+| Layer | Technologies |
+|---|---|
+| Frontend | React, TypeScript, Tailwind CSS, Recharts |
+| Backend | Python, FastAPI |
+| Data processing | Pandas, NumPy |
+| Database | PostgreSQL, SQLite development fallback |
+| Data access and migrations | SQLAlchemy, Alembic |
+| Testing | pytest, frontend tests, TypeScript checks |
+| Development and deployment | Docker Compose configuration |
+| Data exchange | CSV import and export |
+
+## Engineering Highlights
+
+- **12 application pages** covering executive reporting, production, downtime, quality, energy, inventory, recommendations, savings verification, and data exploration.
+- **48 reported API endpoints** supporting analytics, data management, and interactive workflows.
+- **13 reported database tables** with migration support.
+- **Reproducible 90-day demonstration dataset** covering 10 machines, 3 production lines, and 8 products.
+- **98 reported backend tests and 9 reported frontend tests passing** in the original development environment.
+- **Interactive workflow testing** reported for filters, simulation controls, recommendation persistence, savings initiatives, and CSV validation.
+
+These figures describe the reported prototype implementation and test results, not independent certification or production validation.
+
+## Responsible Analytics by Design
+
+FPI is designed around transparency rather than inflated business claims:
+
+- Demonstration records are labelled as simulated data.
+- Financial estimates depend on documented assumptions.
+- Operational correlations are not automatically interpreted as causation.
+- Potential savings are not presented as realized profit.
+- Verification requires server-side checks.
+- Limitations and deployment constraints are documented.
+
+The current loss model includes illustrative assumptions for downtime losses, scrap salvage, and savings realization. These parameters must be validated against authorized company data before the estimates can support operational or financial decisions.
+
+## Getting Started
+
+### Option A — Docker with PostgreSQL
+
 ```bash
-cp .env.example .env          # set POSTGRES_PASSWORD
+cp .env.example .env
+# Configure POSTGRES_PASSWORD
 docker compose up --build
 ```
-App http://localhost:8080 · API docs http://localhost:8000/docs
-*(The compose setup was written but could not be executed in the build environment, which had no Docker daemon. See docs/TESTING.md.)*
 
-### Option B: local development (SQLite fallback, no Docker)
-Prerequisites: Python 3.12+, Node 20+.
+Application: `http://localhost:8080`
+
+API documentation: `http://localhost:8000/docs`
+
+*The Docker/PostgreSQL setup has not yet been executed in the reported build environment.*
+
+### Option B — Local Development
+
+**Prerequisites:** Python 3.12+ and Node.js 20+.
+
 ```bash
 cd backend
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements-dev.txt
-cp ../.env.example .env        # optional; defaults work
-python -m app.cli init-db      # Alembic migrations
-python -m app.cli seed         # reproducible demo dataset (seed 42)
-uvicorn app.main:app --reload --port 8000
-
-# second terminal
-cd frontend && npm install && npm run dev
+python -m venv .venv
 ```
-App http://localhost:5173 · API docs http://localhost:8000/docs (or `./run_dev.sh`).
-SQLite is a development fallback and is not PostgreSQL. Use PostgreSQL via `FPI_DATABASE_URL=postgresql+psycopg://...`.
 
-### Tests
+Activate the virtual environment, then run:
+
 ```bash
-cd backend && python -m pytest -q      # 98 backend tests
-cd frontend && npm test                # 9 frontend tests
+pip install -r requirements-dev.txt
+python -m app.cli init-db
+python -m app.cli seed
+uvicorn app.main:app --reload --port 8000
 ```
 
-### Useful commands
-| Command | Purpose |
-|---|---|
-| `python -m app.cli init-db` | apply migrations |
-| `python -m app.cli seed [--if-empty]` | generate demo data and run the recommendation rules |
-| `python -m app.cli reset-db` | wipe transactional data and re-seed |
-| `python -m app.cli export-samples` | write CSV templates and examples to `sample_data/` |
+In a second terminal:
 
-## What is in the app
-Executive Overview · Profit Leakage · Production · Machine Downtime · Quality · Energy · Inventory · Root Cause Explorer · Recommendations · Savings Verification · Data Explorer (records, CSV import, exports, demo data) · Settings & Docs. A global filter bar (date range, line, machine, product, shift) drives every page. A live-demo bar starts, pauses, steps and resets a simulation that writes new simulated rows into the real tables.
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-## Replacing demo data with authorised company data
-1. Download templates in Data Explorer > Import CSV (or `sample_data/`).
-2. Create your machines, products and lines (reference data is currently seeded; add them with SQL or extend `datagen.create_reference`, see docs/DEPLOYMENT.md).
-3. Import production, downtime, energy and inventory CSVs. Validate first; invalid rows are reported and never written.
-4. Wipe the demo rows if desired (`reset-db` removes all transactional data).
+Open `http://localhost:5173` to access the frontend.
 
-## Documentation
-[Architecture](docs/ARCHITECTURE.md) · [Analytics methodology](docs/ANALYTICS_METHODOLOGY.md) · [Data dictionary](docs/DATA_DICTIONARY.md) · [API](docs/API_DOCUMENTATION.md) · [Testing](docs/TESTING.md) · [Deployment](docs/DEPLOYMENT.md) · [Limitations](docs/LIMITATIONS.md) · [Roadmap](docs/ROADMAP.md)
+See the project documentation for database configuration, migrations, testing, troubleshooting, and deployment details.
 
-## Troubleshooting
-- *Frontend shows "Cannot reach the API"*: start the backend on port 8000; the Vite dev server proxies `/api` to it (`VITE_API_PROXY` to change).
-- *"No data is loaded"*: run `python -m app.cli seed` or use Data Explorer > Demo data.
-- *CORS error from another origin*: add it to `FPI_CORS_ORIGINS`.
-- *Port in use*: change `--port` and `VITE_API_PROXY`.
+## Project Status and Roadmap
+
+FPI is a locally runnable prototype intended to establish the foundation for a more rigorous manufacturing intelligence system.
+
+The next development priorities are:
+
+1. Validate financial calculations against representative, authorized manufacturing data.
+2. Execute and verify the complete PostgreSQL deployment.
+3. Introduce authentication, role-based access control, and audit logging.
+4. Expand reference-data management and data-quality workflows.
+5. Conduct a controlled pilot with an industrial partner.
+6. Compare predicted opportunities with measured operational outcomes and independently verified savings.
+
+## Long-Term Objective
+
+The long-term objective is to evolve FPI from an analytics prototype into a reliable decision-support platform that helps manufacturers connect operational performance with financial outcomes.
+
+**The guiding principle is simple: identify the loss, explain the evidence, prioritize the intervention, and verify the result.**
+
+---
+
+*Factory Profit Intelligence — a manufacturing analytics engineering project focused on transparent loss analysis, actionable recommendations, and measurable operational improvement.*
